@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@neondatabase/serverless": "^1.0.1",
+		"better-auth": "^1.2.9",
 		"drizzle-orm": "^0.44.2",
 		"next": "15.3.3",
 		"react": "^19.0.0",
