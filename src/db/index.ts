@@ -5,4 +5,4 @@ import { getEnv } from "@/lib/utils";
 const db = drizzle(getEnv("DATABASE_URL"));
 
 export default db;
-export * from "./schema";
+export * from "./schemas";
