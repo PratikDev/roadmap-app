@@ -73,4 +73,28 @@ export const roadmapItems: RoadmapItem[] = [
     createdAt: new Date("2024-01-12T16:20:00.000Z"),
     updatedAt: new Date("2024-01-24T11:45:00.000Z"),
   },
+  {
+    id: "b7f2j2g5-6b7c-9d8e-4f5a-6b7c8d9e0f1b",
+    title: "User Feedback Collection",
+    description:
+      "Implement a system for collecting and analyzing user feedback on the product roadmap.",
+    status: "archived",
+    category: "bugfix",
+    upvotes: 25,
+    commentsCount: 5,
+    createdAt: new Date("2024-01-15T10:00:00.000Z"),
+    updatedAt: new Date("2024-01-30T12:00:00.000Z"),
+  },
+  {
+    id: "c8f3k3h6-7b8c-0d9e-5a6b-7c8d9e0f1a2b",
+    title: "Performance Optimization",
+    description:
+      "Enhance application performance with code refactoring, caching strategies, and load balancing.",
+    status: "cancelled",
+    category: "performance",
+    upvotes: 12,
+    commentsCount: 2,
+    createdAt: new Date("2024-01-18T13:30:00.000Z"),
+    updatedAt: new Date("2024-02-01T15:00:00.000Z"),
+  },
 ];
