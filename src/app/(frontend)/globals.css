@@ -26,3 +26,7 @@
     @apply cursor-pointer rounded-md px-4 py-2 font-medium tracking-wide;
   }
 }
+
+@utility container {
+  @apply mx-auto px-4;
+}

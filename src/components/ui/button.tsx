@@ -10,7 +10,7 @@ export default function Button({ className, children, ...rest }: Props) {
     <button
       {...rest}
       className={cn(
-        "bg-primary hover:bg-secondary flex w-full items-center justify-center transition-colors disabled:cursor-auto disabled:opacity-50",
+        "bg-primary hover:bg-secondary flex w-full items-center justify-center gap-1.5 transition-colors disabled:cursor-auto disabled:opacity-50",
         className,
       )}
     >

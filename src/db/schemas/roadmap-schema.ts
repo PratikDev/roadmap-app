@@ -17,6 +17,18 @@ export const roadmapStatusEnum = pgEnum("roadmap_status", [
   "archived",
 ]);
 
+export const roadmapCategoryEnum = pgEnum("roadmap_category", [
+  "frontend",
+  "backend",
+  "api",
+  "ux",
+  "bugfix",
+  "infra",
+  "performance",
+  "security",
+  "mobile",
+]);
+
 export const roadmapItems = pgTable(
   "roadmap_items",
   {
@@ -24,8 +36,9 @@ export const roadmapItems = pgTable(
     title: varchar({ length: 255 }).notNull(),
     description: text().notNull(),
     status: roadmapStatusEnum().notNull(),
-    category: varchar({ length: 100 }),
+    category: roadmapCategoryEnum().notNull(),
     upvotes: integer().default(0).notNull(),
+    commentsCount: integer().default(0).notNull(),
     createdAt: timestamp({ withTimezone: true }).defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).defaultNow(),
   },
@@ -35,3 +48,4 @@ export const roadmapItems = pgTable(
     index("idx_roadmap_items_upvotes").on(table.upvotes),
   ],
 );
+export type RoadmapItem = typeof roadmapItems.$inferSelect;
