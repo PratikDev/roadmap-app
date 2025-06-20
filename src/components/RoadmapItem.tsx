@@ -7,11 +7,10 @@ import { useState } from "react";
 
 import Button from "@/components/ui/button";
 
-import { type RoadmapItem } from "@/db/schemas/roadmap-schema";
 import { cn } from "@/lib/utils";
 import { RoadmapItemsResponse } from "@/types/Responses";
 
-const getStatusColor = (status: RoadmapItem["status"]) => {
+const getStatusColor = (status: RoadmapItemsResponse["status"]) => {
   switch (status) {
     case "completed":
       return "bg-green-100 text-green-800 border-green-200";
@@ -31,14 +30,29 @@ const getStatusColor = (status: RoadmapItem["status"]) => {
 export default function RoadmapItem(
   item: RoadmapItemsResponse & { view?: "list" | "grid" },
 ) {
-  const [isUpvoted, setIsUpvoted] = useState(false);
+  const [isUpvoted, setIsUpvoted] = useState(item.hasUpvoted || false);
   const [expanded, setExpanded] = useState(false);
 
-  const handleUpvote = () => {
-    setIsUpvoted(!isUpvoted);
-  };
-
   const DescriptionSlot = item.view === "grid" ? Link : "p";
+
+  const handleUpvote = async () => {
+    setIsUpvoted((prev) => !prev);
+
+    try {
+      const response = await fetch(`/api/upvote/${item.id}`, {
+        method: "PUT",
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to ${isUpvoted ? "upvote" : "remove upvote"} post`,
+        );
+      }
+    } catch (error) {
+      console.error("Error upvoting:", error);
+      setIsUpvoted((prev) => !prev); // Revert the upvote state on error
+    }
+  };
 
   return (
     <div className="flex flex-col gap-y-4 rounded-lg border border-gray-200 bg-white p-6 transition-shadow duration-200 hover:shadow-md">
@@ -48,8 +62,14 @@ export default function RoadmapItem(
             "items-start justify-between": item.view === "grid",
           })}
         >
-          <Link href={`/roadmap/${item.id}`} className="hover:underline">
-            <h3 className="text-dark text-xl font-semibold">{item.title}</h3>
+          <Link
+            href={`/roadmap/${item.id}`}
+            className="hover:underline"
+            title={item.title}
+          >
+            <h3 className="text-dark line-clamp-2 text-xl font-semibold">
+              {item.title}
+            </h3>
           </Link>
 
           <div
@@ -104,7 +124,8 @@ export default function RoadmapItem(
         >
           <ArrowUp className={cn("size-4", { "fill-current": isUpvoted })} />
           <span className="font-medium">
-            {item.upvotes + (isUpvoted ? 1 : 0)}
+            {item.upvotes +
+              (isUpvoted === item.hasUpvoted ? 0 : isUpvoted ? 1 : -1)}
           </span>
         </Button>
 

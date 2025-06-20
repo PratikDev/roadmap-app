@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
@@ -65,6 +65,58 @@ class RoadmapsAPI {
       category: this.normalizeCategoryName(item.category),
       hasUpvoted: upvotedSet.has(item.id),
     }));
+  }
+
+  async upvote(postId: string) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Unauthorized");
+
+    // Check if the user already upvoted this post
+    const existing = await db.query.upvotes.findFirst({
+      where: (fields, { eq, and }) =>
+        and(eq(fields.userId, userId), eq(fields.roadmapItemId, postId)),
+    });
+
+    if (existing) {
+      /* If the user has already upvoted, remove the upvote */
+
+      await db
+        .delete(upvotes)
+        .where(
+          and(eq(upvotes.userId, userId), eq(upvotes.roadmapItemId, postId)),
+        );
+
+      // Decrement upvote count
+      await db
+        .update(roadmapItems)
+        .set({
+          upvotes: sql`GREATEST(${roadmapItems.upvotes} - 1, 0)`,
+        })
+        .where(eq(roadmapItems.id, postId));
+
+      return { upvoted: false };
+    } else {
+      /* If the user has not upvoted, add the upvote */
+
+      await db.insert(upvotes).values({
+        userId,
+        roadmapItemId: postId,
+      });
+
+      // Increment upvotes count
+      await db
+        .update(roadmapItems)
+        .set({
+          upvotes: sql`${roadmapItems.upvotes} + 1`,
+        })
+        .where(eq(roadmapItems.id, postId));
+
+      return { upvoted: true };
+    }
   }
 }
 
