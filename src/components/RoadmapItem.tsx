@@ -9,6 +9,7 @@ import Button from "@/components/ui/button";
 
 import { type RoadmapItem } from "@/db/schemas/roadmap-schema";
 import { cn } from "@/lib/utils";
+import { RoadmapItemsResponse } from "@/types/Responses";
 
 const getStatusColor = (status: RoadmapItem["status"]) => {
   switch (status) {
@@ -27,7 +28,9 @@ const getStatusColor = (status: RoadmapItem["status"]) => {
   }
 };
 
-export default function RoadmapItem(item: RoadmapItem) {
+export default function RoadmapItem(
+  item: RoadmapItemsResponse & { view?: "list" | "grid" },
+) {
   const [isUpvoted, setIsUpvoted] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -35,28 +38,40 @@ export default function RoadmapItem(item: RoadmapItem) {
     setIsUpvoted(!isUpvoted);
   };
 
+  const DescriptionSlot = item.view === "grid" ? Link : "p";
+
   return (
-    <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-6 transition-shadow duration-200 hover:shadow-md">
+    <div className="flex flex-col gap-y-4 rounded-lg border border-gray-200 bg-white p-6 transition-shadow duration-200 hover:shadow-md">
       <div className="flex flex-col items-start justify-between">
-        <div className="flex items-center gap-3">
+        <div
+          className={cn("flex w-full items-center gap-3", {
+            "items-start justify-between": item.view === "grid",
+          })}
+        >
           <Link href={`/roadmap/${item.id}`} className="hover:underline">
             <h3 className="text-dark text-xl font-semibold">{item.title}</h3>
           </Link>
 
-          {item.category && (
-            <span className="bg-tertiary text-dark inline-block rounded-md px-2 py-1 text-xs">
-              {item.category}
-            </span>
-          )}
-
-          <span
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium capitalize",
-              getStatusColor(item.status),
-            )}
+          <div
+            className={cn("flex items-end gap-2", {
+              "flex-col": item.view === "grid",
+            })}
           >
-            {item.status.replace("_", " ")}
-          </span>
+            {item.category && (
+              <span className="bg-tertiary text-dark inline-block rounded-md px-2 py-1 text-xs">
+                {item.category}
+              </span>
+            )}
+
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium text-nowrap capitalize",
+                getStatusColor(item.status),
+              )}
+            >
+              {item.status.replace("_", " ")}
+            </span>
+          </div>
         </div>
 
         {item.createdAt && (
@@ -66,17 +81,18 @@ export default function RoadmapItem(item: RoadmapItem) {
         )}
       </div>
 
-      <p
-        className={cn("cursor-pointer text-gray-600", {
+      <DescriptionSlot
+        href={`/roadmap/${item.id}`}
+        className={cn("grow cursor-pointer text-gray-600", {
           "line-clamp-3": !expanded,
           "line-clamp-none": expanded,
         })}
-        onClick={() => {
-          setExpanded(!expanded);
-        }}
+        onClick={
+          item.view === "grid" ? undefined : () => setExpanded((prev) => !prev)
+        }
       >
         {item.description}
-      </p>
+      </DescriptionSlot>
 
       <div className="flex items-center gap-4 text-sm *:gap-1">
         <Button

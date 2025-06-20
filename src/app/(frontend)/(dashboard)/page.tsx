@@ -1,20 +1,24 @@
-import RoadmapItem from "@/components/RoadmapItem";
+import RoadmapsView from "./components/RoadmapsView";
+import StatusOverviewCard from "./components/StatusOverview";
 
-import { roadmapItems } from "@/data/roadmap";
-import { type RoadmapItem as RoadmapItemType } from "@/db/schemas/roadmap-schema";
-import { cn } from "@/lib/utils";
+import { dbAPI } from "@/db/api";
+import { RoadmapItemsResponse } from "@/types/Responses";
 
-export default function Home() {
-  const getStatusCounts = (data: RoadmapItemType[]): Record<string, number> => {
-    return {
-      total: data.length,
-      planned: data.filter((item) => item.status === "planned").length,
-      in_progress: data.filter((item) => item.status === "in_progress").length,
-      completed: data.filter((item) => item.status === "completed").length,
-    };
+const getStatusCounts = (
+  data: RoadmapItemsResponse[],
+): Record<string, number> => {
+  return {
+    total: data.length,
+    planned: data.filter((item) => item.status === "planned").length,
+    in_progress: data.filter((item) => item.status === "in_progress").length,
+    completed: data.filter((item) => item.status === "completed").length,
   };
-  const statusCounts = getStatusCounts(roadmapItems);
+};
 
+export default async function Home() {
+  const roadmapItems = await dbAPI.roadmaps.getAll();
+
+  const statusCounts = getStatusCounts(roadmapItems);
   return (
     <div className="container space-y-8 py-6">
       <div className="space-y-4 text-center">
@@ -54,45 +58,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {roadmapItems.map((item) => (
-          <RoadmapItem key={item.id} {...item} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StatusOverviewCard({
-  title,
-  value,
-  variant,
-}: {
-  title: string;
-  value: number;
-  variant: RoadmapItemType["status"] | "total";
-}) {
-  const getStatusColor = (status: RoadmapItemType["status"] | "total") => {
-    switch (status) {
-      case "completed":
-        return "text-green-600";
-      case "in_progress":
-        return "text-blue-600";
-      case "planned":
-        return "text-yellow-600";
-      case "cancelled":
-        return "text-red-600";
-      case "archived":
-        return "text-gray-600";
-      case "total":
-        return "text-gray-800";
-    }
-  };
-
-  return (
-    <div className="rounded-lg bg-white/70 px-6 py-3 backdrop-blur-sm">
-      <div className="text-dark text-2xl font-bold">{value}</div>
-      <div className={cn("text-sm", getStatusColor(variant))}>{title}</div>
+      <RoadmapsView roadmapItems={roadmapItems} />
     </div>
   );
 }
