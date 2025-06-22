@@ -1,6 +1,7 @@
 import RoadmapItem from "@/components/RoadmapItem";
 import CommentsArea from "./components/CommentsArea";
 
+import BackButton from "@/components/BackButton";
 import { dbAPI } from "@/db/api";
 
 type Props = {
@@ -16,6 +17,8 @@ export default async function page({ params }: Props) {
 
   return (
     <div className="container py-6">
+      <BackButton className="mb-4" />
+
       <RoadmapItem
         detailPage
         {...roadmap}
