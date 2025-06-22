@@ -23,6 +23,8 @@ export const comments = pgTable("comments", {
     onDelete: "cascade",
   }),
   depth: integer().notNull().default(0),
+  repliesCount: integer().notNull().default(0),
   createdAt: timestamp({ withTimezone: true }).defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
 });
+export type Comments = typeof comments.$inferSelect;

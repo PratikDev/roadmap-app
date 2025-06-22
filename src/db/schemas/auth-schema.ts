@@ -48,3 +48,5 @@ export const verification = pgTable("verification", {
   createdAt: timestamp({ withTimezone: true }).defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
 });
+
+export type User = typeof user.$inferSelect;

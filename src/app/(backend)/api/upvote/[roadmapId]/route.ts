@@ -10,9 +10,9 @@ type Props = {
 export async function PUT(_: any, { params }: Props) {
   try {
     const { roadmapId } = await params;
-    const request = await dbAPI.roadmaps.upvote(roadmapId);
+    const response = await dbAPI.roadmaps.upvote(roadmapId);
 
-    return NextResponse.json(request);
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error upvoting:", error);
     return NextResponse.json(

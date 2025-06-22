@@ -28,7 +28,7 @@ const getStatusColor = (status: RoadmapItemsResponse["status"]) => {
 };
 
 export default function RoadmapItem(
-  item: RoadmapItemsResponse & { view?: "list" | "grid" },
+  item: RoadmapItemsResponse & { view?: "list" | "grid"; className?: string },
 ) {
   const [isUpvoted, setIsUpvoted] = useState(item.hasUpvoted || false);
   const [expanded, setExpanded] = useState(false);
@@ -55,7 +55,12 @@ export default function RoadmapItem(
   };
 
   return (
-    <div className="flex flex-col gap-y-4 rounded-lg border border-gray-200 bg-white p-6 transition-shadow duration-200 hover:shadow-md">
+    <div
+      className={cn(
+        "flex flex-col gap-y-4 rounded-lg border border-gray-200 bg-white p-6 transition-shadow duration-200 hover:shadow-md",
+        item.className,
+      )}
+    >
       <div className="flex flex-col items-start justify-between">
         <div
           className={cn("flex w-full items-center gap-3", {
