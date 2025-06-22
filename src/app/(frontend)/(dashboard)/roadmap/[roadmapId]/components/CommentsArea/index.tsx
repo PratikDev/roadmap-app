@@ -112,10 +112,7 @@ export default function CommentsArea({
           />
 
           <div className="absolute right-2 h-full p-1">
-            <Button
-              type="submit"
-              className="h-full w-auto rounded-full px-3 py-1.5"
-            >
+            <Button type="submit" className="h-full rounded-full px-3 py-1.5">
               <SendHorizonal className="size-4" />
             </Button>
           </div>

@@ -85,7 +85,7 @@ export default function page() {
           </div>
 
           <div className="space-y-6">
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="w-full">
               Sign in
               {isLoading && <Loader2 className="ml-2 size-4 animate-spin" />}
             </Button>

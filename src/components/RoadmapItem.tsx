@@ -28,12 +28,17 @@ const getStatusColor = (status: RoadmapItemsResponse["status"]) => {
 };
 
 export default function RoadmapItem(
-  item: RoadmapItemsResponse & { view?: "list" | "grid"; className?: string },
+  item: RoadmapItemsResponse & {
+    view?: "list" | "grid";
+    detailPage?: boolean;
+    className?: string;
+  },
 ) {
   const [isUpvoted, setIsUpvoted] = useState(item.hasUpvoted || false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(item.detailPage || false);
 
-  const DescriptionSlot = item.view === "grid" ? Link : "p";
+  const DescriptionSlot = item.view === "grid" && !item.detailPage ? Link : "p";
+  const TitleSlot = item.detailPage ? "div" : Link;
 
   const handleUpvote = async () => {
     setIsUpvoted((prev) => !prev);
@@ -67,15 +72,17 @@ export default function RoadmapItem(
             "items-start justify-between": item.view === "grid",
           })}
         >
-          <Link
+          <TitleSlot
             href={`/roadmap/${item.id}`}
-            className="hover:underline"
+            className={cn({
+              "hover:underline": !item.detailPage,
+            })}
             title={item.title}
           >
             <h3 className="text-dark line-clamp-2 text-xl font-semibold">
               {item.title}
             </h3>
-          </Link>
+          </TitleSlot>
 
           <div
             className={cn("flex items-end gap-2", {
@@ -108,9 +115,10 @@ export default function RoadmapItem(
 
       <DescriptionSlot
         href={`/roadmap/${item.id}`}
-        className={cn("grow cursor-pointer text-gray-600", {
-          "line-clamp-3": !expanded,
+        className={cn("grow text-gray-600", {
           "line-clamp-none": expanded,
+          "line-clamp-3": !expanded,
+          "cursor-pointer": !item.detailPage,
         })}
         onClick={
           item.view === "grid" ? undefined : () => setExpanded((prev) => !prev)
@@ -122,7 +130,7 @@ export default function RoadmapItem(
       <div className="flex items-center gap-4 text-sm *:gap-1">
         <Button
           onClick={handleUpvote}
-          className={cn("w-auto bg-gray-100 px-3 py-2 text-gray-600", {
+          className={cn("bg-gray-100 px-3 py-2 text-gray-600", {
             "bg-secondary text-dark": isUpvoted,
             "hover:bg-tertiary hover:text-dark": !isUpvoted,
           })}

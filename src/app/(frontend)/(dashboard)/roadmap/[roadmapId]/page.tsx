@@ -17,6 +17,7 @@ export default async function page({ params }: Props) {
   return (
     <div className="container py-6">
       <RoadmapItem
+        detailPage
         {...roadmap}
         className="rounded-b-none border-b-0 hover:shadow-none"
       />

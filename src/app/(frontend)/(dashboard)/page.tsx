@@ -19,6 +19,7 @@ export default async function Home() {
   const roadmapItems = await dbAPI.roadmaps.getAll();
 
   const statusCounts = getStatusCounts(roadmapItems);
+
   return (
     <div className="container space-y-8 py-6">
       <div className="space-y-4 text-center">

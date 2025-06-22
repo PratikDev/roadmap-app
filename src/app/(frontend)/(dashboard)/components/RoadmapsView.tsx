@@ -21,7 +21,6 @@ export default function RoadmapsView({
       <div className="flex justify-end px-2">
         <Button
           onClick={() => setView((prev) => (prev === "grid" ? "list" : "grid"))}
-          className="w-auto"
           title={
             view === "grid" ? "Switch to List View" : "Switch to Grid View"
           }
@@ -35,8 +34,8 @@ export default function RoadmapsView({
       </div>
 
       <div
-        className={cn("grid grid-cols-4 gap-4", {
-          "grid-cols-1": view === "list",
+        className={cn("grid grid-cols-1 gap-4", {
+          "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4": view === "grid",
         })}
       >
         {roadmapItems.map((item) => (

@@ -66,7 +66,7 @@ export default function CommentCard(comment: CommentsResponse) {
         <Button
           onClick={fetchReplies}
           disabled={loadingReplies}
-          className="hover:bg-tertiary hover:text-dark w-auto bg-gray-100 px-2.5 py-1.5 text-gray-600"
+          className="hover:bg-tertiary hover:text-dark bg-gray-100 px-2.5 py-1.5 text-gray-600"
         >
           <MessageCircle className="size-3.5" />
           <span>{comment.repliesCount}</span>
