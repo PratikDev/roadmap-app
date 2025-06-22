@@ -5,17 +5,24 @@ const AUTH_ROUTES = ["/sign-in", "/sign-up", "/api/auth"];
 
 export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
-  const isAuthRoute = AUTH_ROUTES.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
-  );
+  const isAuthRoute = () => {
+    // If it's sign-out route, it's not technically an auth route
+    if (request.nextUrl.pathname.endsWith("/sign-out")) {
+      return false;
+    }
+
+    return AUTH_ROUTES.some((route) =>
+      request.nextUrl.pathname.startsWith(route),
+    );
+  };
 
   // 1. If request is for auth route and session exists, redirect to home
-  if (isAuthRoute && sessionCookie) {
+  if (isAuthRoute() && sessionCookie) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   // 2. If request is not for auth route and session does not exist, redirect to sign-in
-  if (!isAuthRoute && !sessionCookie) {
+  if (!isAuthRoute() && !sessionCookie) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
