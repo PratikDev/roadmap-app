@@ -11,6 +11,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 
 import { authClient } from "@/lib/auth-client";
+import { SignUpSchema } from "@/schemas/SignUpSchema";
 
 export default function page() {
   const router = useRouter();
@@ -26,13 +27,23 @@ export default function page() {
     const password = formData.get("password")?.toString() || "";
     const confirmPassword = formData.get("confirm-password")?.toString() || "";
 
-    /* TODO: Add schema validation */
+    const schemaResponse = SignUpSchema.safeParse({
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+    if (!schemaResponse.success) {
+      const errorMessage = schemaResponse.error.issues[0].message;
+      toast.error(errorMessage);
+      return;
+    }
 
     await authClient.signUp.email(
       {
-        email,
-        password,
-        name,
+        name: schemaResponse.data.name,
+        email: schemaResponse.data.email,
+        password: schemaResponse.data.password,
       },
       {
         onRequest: () => setIsLoading(true),

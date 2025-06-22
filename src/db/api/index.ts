@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 
 import { COMMENT_MAX_DEPTH } from "@/constants";
 import { auth } from "@/lib/auth";
+import { CommentSchema } from "@/schemas/CommentSchema";
 import {
   CommentsResponse,
   RoadmapItemDetailResponse,
@@ -208,7 +209,14 @@ class RoadmapsAPI {
     const userId = session?.user?.id;
     if (!userId) throw new Error("Unauthorized");
 
-    /* TODO: Add schema validation */
+    const schemaResponse = CommentSchema.safeParse({
+      content,
+      parentCommentId: parentId,
+    });
+    if (!schemaResponse.success) {
+      const errorMessage = schemaResponse.error.issues[0].message;
+      throw new Error(errorMessage);
+    }
 
     // 2. Ensure roadmap item exists
     const post = await db.query.roadmapItems.findFirst({

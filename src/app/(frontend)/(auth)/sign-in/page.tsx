@@ -11,11 +11,11 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 
 import { authClient } from "@/lib/auth-client";
+import { SignInSchema } from "@/schemas/SignInSchema";
 
 export default function page() {
-  const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,12 +24,20 @@ export default function page() {
     const email = formData.get("email")?.toString() || "";
     const password = formData.get("password")?.toString() || "";
 
-    /* TODO: Add schema validation */
+    const schemaResponse = SignInSchema.safeParse({
+      email,
+      password,
+    });
+    if (!schemaResponse.success) {
+      const errorMessage = schemaResponse.error.issues[0].message;
+      toast.error(errorMessage);
+      return;
+    }
 
     await authClient.signIn.email(
       {
-        email,
-        password,
+        email: schemaResponse.data.email,
+        password: schemaResponse.data.password,
       },
       {
         onRequest: () => setIsLoading(true),

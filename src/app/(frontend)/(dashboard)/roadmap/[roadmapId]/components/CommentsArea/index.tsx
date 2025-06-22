@@ -2,6 +2,7 @@
 
 import { SendHorizonal } from "lucide-react";
 import { useId, useState } from "react";
+import toast from "react-hot-toast";
 
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
@@ -9,6 +10,7 @@ import CommentCard from "./CommentCard";
 
 import { COMMENT_MAX_DEPTH } from "@/constants";
 import { cn } from "@/lib/utils";
+import { CommentSchema } from "@/schemas/CommentSchema";
 import { CommentsResponse } from "@/types/Responses";
 
 type Props = {
@@ -30,12 +32,21 @@ export default function CommentsArea({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
     const form = event.target as HTMLFormElement;
     const threadInput = form.elements.namedItem(
       `thread-input-${renderId}`,
     ) as HTMLInputElement;
 
-    /* TODO: Add schema validation */
+    const schemaResponse = CommentSchema.safeParse({
+      content: threadInput.value,
+      parentCommentId,
+    });
+    if (!schemaResponse.success) {
+      const errorMessage = schemaResponse.error.issues[0].message;
+      toast.error(errorMessage);
+      return;
+    }
 
     try {
       // Optimistically update the comments list
@@ -68,8 +79,8 @@ export default function CommentsArea({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: threadInput.value,
-          parentId: parentCommentId || null,
+          content: schemaResponse.data.content,
+          parentId: schemaResponse.data.parentCommentId || null,
         }),
       });
 
@@ -81,6 +92,7 @@ export default function CommentsArea({
       setThreadsList((prev) => prev.slice(1));
 
       console.error("Error commenting:", error);
+      toast.error("Failed to submit comment. Please try again.");
     } finally {
       form.reset();
     }
