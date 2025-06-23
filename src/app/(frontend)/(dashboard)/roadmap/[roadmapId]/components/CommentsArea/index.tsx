@@ -98,6 +98,10 @@ export default function CommentsArea({
     }
   };
 
+  const handleRemove = (commentId: string) => {
+    setThreadsList((prev) => prev.filter((c) => c.id !== commentId));
+  };
+
   return (
     <div
       className={cn(
@@ -134,7 +138,11 @@ export default function CommentsArea({
       {threadsList.length > 0 ? (
         <div className="space-y-2">
           {threadsList.map((comment) => (
-            <CommentCard key={comment.id} {...comment} />
+            <CommentCard
+              key={comment.id}
+              {...comment}
+              onRemove={handleRemove}
+            />
           ))}
         </div>
       ) : depth === 0 ? (

@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
+import { z } from "zod/v4";
 
 import {
   COMMENT_MAX_DEPTH,
@@ -327,6 +328,105 @@ class RoadmapsAPI {
     }
 
     return inserted[0];
+  }
+
+  async editComment(
+    roadmapId: string,
+    {
+      commentId,
+      content,
+    }: {
+      commentId: string;
+      content: string;
+    },
+  ) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Unauthorized");
+
+    const schemaResponse = CommentSchema.extend({
+      id: z
+        .string()
+        .min(1, "Comment ID is required")
+        .max(300, "Comment ID is too long"),
+    }).safeParse({
+      content,
+      id: commentId,
+    });
+    if (!schemaResponse.success) {
+      const errorMessage = schemaResponse.error.issues[0].message;
+      throw new Error(errorMessage);
+    }
+
+    const comment = await db.query.comments.findFirst({
+      where: (c, { eq }) =>
+        and(eq(c.id, commentId), eq(c.roadmapItemId, roadmapId)),
+    });
+
+    if (!comment) throw new Error("Comment not found");
+    if (comment.userId !== userId) throw new Error("Forbidden");
+
+    await db
+      .update(comments)
+      .set({
+        content,
+        updatedAt: new Date(),
+      })
+      .where(eq(comments.id, commentId));
+
+    return { success: true };
+  }
+
+  async deleteComment(roadmapId: string, commentId: string) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Unauthorized");
+
+    // fetch the comment
+    const comment = await db.query.comments.findFirst({
+      where: (c, { eq }) =>
+        and(eq(c.id, commentId), eq(c.roadmapItemId, roadmapId)),
+      columns: {
+        userId: true,
+        parentCommentId: true,
+        roadmapItemId: true,
+      },
+    });
+
+    if (!comment) throw new Error("Comment not found");
+    if (comment.userId !== userId) throw new Error("Forbidden");
+
+    // delete the comment
+    await db.delete(comments).where(eq(comments.id, commentId));
+
+    // decrement counters accordingly
+    if (comment.parentCommentId) {
+      /* if it's a reply, decrement repliesCount of parent comment */
+
+      await db
+        .update(comments)
+        .set({
+          repliesCount: sql`GREATEST(${comments.repliesCount} - 1, 0)`,
+        })
+        .where(eq(comments.id, comment.parentCommentId));
+    } else {
+      /* if it's a top-level comment, decrement commentsCount of roadmap item */
+
+      await db
+        .update(roadmapItems)
+        .set({
+          commentsCount: sql`GREATEST(${roadmapItems.commentsCount} - 1, 0)`,
+        })
+        .where(eq(roadmapItems.id, comment.roadmapItemId));
+    }
+
+    return { success: true };
   }
 
   async getReplies(

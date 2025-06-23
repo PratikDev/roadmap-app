@@ -2,12 +2,18 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_ROUTES = ["/sign-in", "/sign-up", "/api/auth"];
+const AUTH_ROUTES_EXCEPTIONS = ["/sign-out", "/get-session"]; // these are not technically auth routes, but still hits `/api/auth`
 
 export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const isAuthRoute = () => {
-    // If it's sign-out route, it's not technically an auth route
-    if (request.nextUrl.pathname.endsWith("/sign-out")) {
+    // If the route ends with an exception, it's not an auth route
+    // This allows us to handle sign-out and get-session without redirecting
+    if (
+      AUTH_ROUTES_EXCEPTIONS.some((route) =>
+        request.nextUrl.pathname.endsWith(route),
+      )
+    ) {
       return false;
     }
 
