@@ -263,7 +263,7 @@ class RoadmapsAPI {
 
     const schemaResponse = CommentSchema.safeParse({
       content,
-      parentCommentId: parentId,
+      parentCommentId: parentId || undefined,
     });
     if (!schemaResponse.success) {
       const errorMessage = schemaResponse.error.issues[0].message;
