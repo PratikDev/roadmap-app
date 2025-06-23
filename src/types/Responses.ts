@@ -1,7 +1,8 @@
 import { Comments, RoadmapItem, User } from "@/db";
 
-export type RoadmapItemsResponse = Omit<RoadmapItem, "category"> & {
+export type RoadmapItemsResponse = Omit<RoadmapItem, "category" | "status"> & {
   category: string;
+  status: string;
   hasUpvoted: boolean;
 };
 

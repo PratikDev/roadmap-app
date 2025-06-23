@@ -3,6 +3,7 @@ import RoadmapsView from "./components/RoadmapsView";
 import StatusOverviewCard from "./components/StatusOverview";
 
 import { MAX_POST_PER_PAGE } from "@/constants";
+import { RoadmapItem } from "@/db";
 import { dbAPI } from "@/db/api";
 import { RoadmapItemsResponse } from "@/types/Responses";
 
@@ -11,23 +12,42 @@ const getStatusCounts = (
 ): Record<string, number> => {
   return {
     total: data.length,
-    planned: data.filter((item) => item.status === "planned").length,
-    in_progress: data.filter((item) => item.status === "in_progress").length,
-    completed: data.filter((item) => item.status === "completed").length,
+    planned: data.filter((item) => item.status === "Planned").length,
+    in_progress: data.filter((item) => item.status === "In Progress").length,
+    completed: data.filter((item) => item.status === "Completed").length,
   };
 };
 
 type Props = {
-  searchParams?: Promise<{ page: string | string[] | undefined }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 export default async function Home({ searchParams }: Props) {
+  // Page param
   const pageParam = (await searchParams)?.page || "1";
   const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam) || 1;
 
-  const { total, data: roadmapItems } = await dbAPI.roadmaps.getAll(page);
+  // Status param
+  const statusParam = (await searchParams)?.status || "all";
+  const status = Array.isArray(statusParam) ? statusParam[0] : statusParam;
+
+  // Category param
+  const categoryParam = (await searchParams)?.category || "all";
+  const category = Array.isArray(categoryParam)
+    ? categoryParam[0]
+    : categoryParam;
+
+  const sortByParam = (await searchParams)?.sortBy || "newest";
+  const sortBy = Array.isArray(sortByParam) ? sortByParam[0] : sortByParam;
+
+  const { total, data } = await dbAPI.roadmaps.getAll(page, {
+    status: status === "all" ? undefined : (status as RoadmapItem["status"]),
+    category:
+      category === "all" ? undefined : (category as RoadmapItem["category"]),
+    sortBy: sortBy,
+  });
   const totalPages = Math.ceil(total / MAX_POST_PER_PAGE);
 
-  const statusCounts = getStatusCounts(roadmapItems);
+  const statusCounts = getStatusCounts(data);
 
   return (
     <div className="container space-y-8 py-6">
@@ -68,9 +88,9 @@ export default async function Home({ searchParams }: Props) {
         </div>
       </div>
 
-      <RoadmapsView roadmapItems={roadmapItems} />
+      <RoadmapsView roadmapItems={data} params={{ status, category, sortBy }} />
 
-      {roadmapItems.length > 0 && totalPages > 1 && (
+      {data.length > 0 && totalPages > 1 && (
         <Pagination
           className="mb-8"
           totalPages={totalPages}

@@ -1,7 +1,12 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { COMMENT_MAX_DEPTH, MAX_POST_PER_PAGE } from "@/constants";
+import {
+  COMMENT_MAX_DEPTH,
+  MAX_POST_PER_PAGE,
+  ROADMAP_CATEGORIES,
+  ROADMAP_STATUSES,
+} from "@/constants";
 import { auth } from "@/lib/auth";
 import { CommentSchema } from "@/schemas/CommentSchema";
 import {
@@ -20,27 +25,25 @@ import db, {
 
 class RoadmapsAPI {
   private normalizeCategoryName(category: RoadmapItem["category"]) {
-    switch (category) {
-      case "api":
-        return "API";
-      case "backend":
-        return "Backend";
-      case "frontend":
-        return "Frontend";
-      case "bugfix":
-        return "Bugfix";
-      case "infra":
-        return "Infrastructure";
-      case "mobile":
-        return "Mobile";
-      case "performance":
-        return "Performance";
-      case "security":
-        return "Security";
-      case "ux":
-        return "UX";
-    }
+    return (
+      ROADMAP_CATEGORIES.find((c) => c.value === category)?.label ||
+      "Unknown Category"
+    );
   }
+
+  private normalizeStatusName(status: RoadmapItem["status"]) {
+    return (
+      ROADMAP_STATUSES.find((s) => s.value === status)?.label ||
+      "Unknown Status"
+    );
+  }
+
+  private SORT_MAP = {
+    newest: desc(roadmapItems.createdAt),
+    oldest: asc(roadmapItems.createdAt),
+    most_upvoted: desc(roadmapItems.upvotes),
+    least_upvoted: asc(roadmapItems.upvotes),
+  };
 
   async get(roadmapId: string): Promise<RoadmapItemDetailResponse | undefined> {
     const session = await auth.api.getSession({
@@ -97,12 +100,20 @@ class RoadmapsAPI {
     return {
       ...item,
       category: this.normalizeCategoryName(item.category),
+      status: this.normalizeStatusName(item.status),
       hasUpvoted: !!userUpvote,
       comments: commentsData,
     };
   }
 
-  async getAll(_page: number = 1): Promise<{
+  async getAll(
+    _page: number = 1,
+    filter: {
+      status?: RoadmapItem["status"];
+      category?: RoadmapItem["category"];
+      sortBy?: string;
+    },
+  ): Promise<{
     total: number;
     data: RoadmapItemsResponse[];
   }> {
@@ -113,9 +124,24 @@ class RoadmapsAPI {
     const userId = session?.user?.id;
     if (!userId) throw new Error("Unauthorized");
 
+    const page = Math.max(1, _page); // Ensure page is at least 1
+
+    // 1. Build WHERE filters
+    const whereConditions = [];
+    if (filter.status) {
+      whereConditions.push(eq(roadmapItems.status, filter.status));
+    }
+    if (filter.category) {
+      whereConditions.push(eq(roadmapItems.category, filter.category));
+    }
+
+    const whereClause =
+      whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
     const totalResult = await db
       .select({ count: sql<number>`COUNT(*)` })
-      .from(roadmapItems);
+      .from(roadmapItems)
+      .where(whereClause);
 
     const total = totalResult[0]?.count ?? 0;
 
@@ -124,14 +150,17 @@ class RoadmapsAPI {
       return { total, data: [] };
     }
 
-    const page = Math.max(1, _page); // Ensure page is at least 1
+    const sortBy =
+      this.SORT_MAP[filter.sortBy as keyof typeof this.SORT_MAP] ??
+      desc(roadmapItems.createdAt);
 
     const roadmaps = await db
       .select()
       .from(roadmapItems)
       .limit(MAX_POST_PER_PAGE)
+      .where(whereClause)
       .offset((page - 1) * MAX_POST_PER_PAGE)
-      .orderBy(desc(roadmapItems.createdAt));
+      .orderBy(sortBy);
 
     const roadmapIds = roadmaps.map((item) => item.id);
 
@@ -156,6 +185,7 @@ class RoadmapsAPI {
       data: roadmaps.map((item) => ({
         ...item,
         category: this.normalizeCategoryName(item.category),
+        status: this.normalizeStatusName(item.status),
         hasUpvoted: upvotedSet.has(item.id),
       })),
     };

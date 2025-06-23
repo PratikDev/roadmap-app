@@ -12,15 +12,15 @@ import { RoadmapItemsResponse } from "@/types/Responses";
 
 const getStatusColor = (status: RoadmapItemsResponse["status"]) => {
   switch (status) {
-    case "completed":
+    case "Completed":
       return "bg-green-100 text-green-800 border-green-200";
-    case "in_progress":
+    case "In Progress":
       return "bg-blue-100 text-blue-800 border-blue-200";
-    case "planned":
+    case "Planned":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "cancelled":
+    case "Cancelled":
       return "bg-red-100 text-red-800 border-red-200";
-    case "archived":
+    case "Archived":
       return "bg-gray-100 text-gray-800 border-gray-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
