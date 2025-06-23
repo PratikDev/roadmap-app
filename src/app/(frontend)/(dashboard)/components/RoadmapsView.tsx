@@ -16,7 +16,7 @@ export default function RoadmapsView({
 }) {
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  return (
+  return roadmapItems.length > 0 ? (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end px-2">
         <Button
@@ -42,6 +42,12 @@ export default function RoadmapsView({
           <RoadmapItem key={item.id} view={view} {...item} />
         ))}
       </div>
+    </div>
+  ) : (
+    <div className="flex h-64 items-center justify-center">
+      <p className="text-center text-4xl text-gray-500">
+        No roadmap items found.
+      </p>
     </div>
   );
 }

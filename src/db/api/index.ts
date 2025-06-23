@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { COMMENT_MAX_DEPTH } from "@/constants";
+import { COMMENT_MAX_DEPTH, MAX_POST_PER_PAGE } from "@/constants";
 import { auth } from "@/lib/auth";
 import { CommentSchema } from "@/schemas/CommentSchema";
 import {
@@ -102,7 +102,10 @@ class RoadmapsAPI {
     };
   }
 
-  async getAll(): Promise<RoadmapItemsResponse[]> {
+  async getAll(_page: number = 1): Promise<{
+    total: number;
+    data: RoadmapItemsResponse[];
+  }> {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -110,15 +113,30 @@ class RoadmapsAPI {
     const userId = session?.user?.id;
     if (!userId) throw new Error("Unauthorized");
 
+    const totalResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(roadmapItems);
+
+    const total = totalResult[0]?.count ?? 0;
+
+    // If no items, return early
+    if (total === 0) {
+      return { total, data: [] };
+    }
+
+    const page = Math.max(1, _page); // Ensure page is at least 1
+
     const roadmaps = await db
       .select()
       .from(roadmapItems)
+      .limit(MAX_POST_PER_PAGE)
+      .offset((page - 1) * MAX_POST_PER_PAGE)
       .orderBy(desc(roadmapItems.createdAt));
 
     const roadmapIds = roadmaps.map((item) => item.id);
 
     if (roadmapIds.length === 0) {
-      return [];
+      return { total, data: [] };
     }
 
     const userUpvotes = await db
@@ -133,11 +151,14 @@ class RoadmapsAPI {
 
     const upvotedSet = new Set(userUpvotes.map((u) => u.roadmapItemId));
 
-    return roadmaps.map((item) => ({
-      ...item,
-      category: this.normalizeCategoryName(item.category),
-      hasUpvoted: upvotedSet.has(item.id),
-    }));
+    return {
+      total,
+      data: roadmaps.map((item) => ({
+        ...item,
+        category: this.normalizeCategoryName(item.category),
+        hasUpvoted: upvotedSet.has(item.id),
+      })),
+    };
   }
 
   async upvote(postId: string): Promise<{ upvoted: boolean }> {

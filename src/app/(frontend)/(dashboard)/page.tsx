@@ -1,6 +1,8 @@
+import Pagination from "@/components/ui/pagination";
 import RoadmapsView from "./components/RoadmapsView";
 import StatusOverviewCard from "./components/StatusOverview";
 
+import { MAX_POST_PER_PAGE } from "@/constants";
 import { dbAPI } from "@/db/api";
 import { RoadmapItemsResponse } from "@/types/Responses";
 
@@ -15,8 +17,15 @@ const getStatusCounts = (
   };
 };
 
-export default async function Home() {
-  const roadmapItems = await dbAPI.roadmaps.getAll();
+type Props = {
+  searchParams?: Promise<{ page: string | string[] | undefined }>;
+};
+export default async function Home({ searchParams }: Props) {
+  const pageParam = (await searchParams)?.page || "1";
+  const page = Number(Array.isArray(pageParam) ? pageParam[0] : pageParam) || 1;
+
+  const { total, data: roadmapItems } = await dbAPI.roadmaps.getAll(page);
+  const totalPages = Math.ceil(total / MAX_POST_PER_PAGE);
 
   const statusCounts = getStatusCounts(roadmapItems);
 
@@ -60,6 +69,14 @@ export default async function Home() {
       </div>
 
       <RoadmapsView roadmapItems={roadmapItems} />
+
+      {roadmapItems.length > 0 && totalPages > 1 && (
+        <Pagination
+          className="mb-8"
+          totalPages={totalPages}
+          currentPage={page}
+        />
+      )}
     </div>
   );
 }
