@@ -1,42 +1,42 @@
 {
-	"name": "roadmap-app",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev --turbopack",
-		"build": "next build",
-		"start": "next start",
-		"lint": "next lint",
-		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio"
-	},
-	"dependencies": {
-		"@neondatabase/serverless": "^1.0.1",
-		"better-auth": "^1.2.9",
-		"clsx": "^2.1.1",
-		"date-fns": "^4.1.0",
-		"drizzle-orm": "^0.44.2",
-		"lucide-react": "^0.517.0",
-		"next": "15.3.3",
-		"nextjs-toploader": "^3.8.16",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
-		"react-hot-toast": "^2.5.2",
-		"tailwind-merge": "^3.3.1",
-		"validation-better-auth": "^1.3.4",
-		"zod": "^3.25.67"
-	},
-	"devDependencies": {
-		"@faker-js/faker": "^9.8.0",
-		"@tailwindcss/postcss": "^4",
-		"@types/node": "^20",
-		"@types/react": "^19",
-		"@types/react-dom": "^19",
-		"drizzle-kit": "^0.31.1",
-		"prettier": "^3.5.3",
-		"prettier-plugin-tailwindcss": "^0.6.12",
-		"tailwindcss": "^4",
-		"tsx": "^4.20.3",
-		"typescript": "^5"
-	}
+  "name": "roadmap-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "better-auth": "^1.2.9",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.44.2",
+    "lucide-react": "^0.517.0",
+    "next": "15.3.8",
+    "nextjs-toploader": "^3.8.16",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "tailwind-merge": "^3.3.1",
+    "validation-better-auth": "^1.3.4",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.1",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.3",
+    "typescript": "^5"
+  }
 }
