@@ -34,6 +34,7 @@ const FilterSort = ({
       <div className="grid gap-4 md:grid-cols-3">
         {/* Status Filter */}
         <SelectSection
+          id="status-filter"
           value={statusFilter}
           onChange={(value) => onChange("status", value)}
           options={statusOptions}
@@ -44,6 +45,7 @@ const FilterSort = ({
 
         {/* Category Filter */}
         <SelectSection
+          id="category-filter"
           value={categoryFilter}
           onChange={(value) => onChange("category", value)}
           options={[{ value: "all", label: "All Categories" }, ...categories]}
@@ -53,6 +55,7 @@ const FilterSort = ({
 
         {/* Sort */}
         <SelectSection
+          id="sort-by-filter"
           value={sortBy}
           onChange={(value) => onChange("sortBy", value)}
           options={sortOptions}
@@ -66,22 +69,28 @@ const FilterSort = ({
 };
 
 const SelectSection = ({
+  id,
   value,
   onChange,
   options,
   children,
 }: {
+  id: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   children: React.ReactNode;
 }) => (
   <div>
-    <label className="text-dark mb-2 flex items-center gap-2 text-sm font-medium">
+    <label
+      htmlFor={id}
+      className="text-dark mb-2 flex items-center gap-2 text-sm font-medium"
+    >
       {children}
     </label>
 
     <select
+      id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="text-dark w-full rounded-lg border border-gray-200 bg-white px-3 py-2"
