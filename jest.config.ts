@@ -21,7 +21,14 @@ const config: Config = {
         "^@/(.*)$": "<rootDir>/src/$1",
       },
       transform: {
-        "^.+\\.(t|j)sx?$": ["babel-jest", { presets: ["next/babel"] }],
+        "^.+\\.(t|j)sx?$": [
+          "babel-jest",
+          {
+            presets: [
+              ["next/babel", { "preset-react": { runtime: "automatic" } }],
+            ],
+          },
+        ],
       },
     },
     {
@@ -36,7 +43,14 @@ const config: Config = {
         "^@/(.*)$": "<rootDir>/src/$1",
       },
       transform: {
-        "^.+\\.(t|j)sx?$": ["babel-jest", { presets: ["next/babel"] }],
+        "^.+\\.(t|j)sx?$": [
+          "babel-jest",
+          {
+            presets: [
+              ["next/babel", { "preset-react": { runtime: "automatic" } }],
+            ],
+          },
+        ],
       },
     },
   ],
