@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const AUTH_ROUTES = ["/sign-in", "/sign-up", "/api/auth"];
 const AUTH_ROUTES_EXCEPTIONS = ["/sign-out", "/get-session"]; // these are not technically auth routes, but still hits `/api/auth`
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const isAuthRoute = () => {
     // If the route ends with an exception, it's not an auth route
