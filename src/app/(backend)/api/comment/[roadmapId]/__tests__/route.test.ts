@@ -23,7 +23,10 @@ const mockedRoadmaps = dbAPI.roadmaps as unknown as {
 
 const params = Promise.resolve({ roadmapId: "roadmap-1" });
 
-function makeRequest(url: string, init?: RequestInit) {
+function makeRequest(
+  url: string,
+  init?: ConstructorParameters<typeof NextRequest>[1],
+) {
   return new NextRequest(new URL(url, "http://localhost:3000"), init);
 }
 
